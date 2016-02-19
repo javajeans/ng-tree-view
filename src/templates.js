@@ -2,24 +2,26 @@
 
 const tree = () => `
   <ul>
-    <li ng-repeat="item in tree" compiled="templates.item"></li>
+    <li ng-repeat="item in tree track by $index" compiled="templates.item"></li>
   </ul>
 `;
 
 const item = () => `
-  <span ng-show="item._ngTree.status !== 'loading'">
-    <i ng-click="toggleFolding(item)" ng-show="item._ngTree.collapsed">[-]</i>
-    <i ng-click="toggleFolding(item)" ng-show="!item._ngTree.collapsed">[+]</i>
-  </span>
+  <div class='ng-tree-item-content' ng-class="{'selected': item._ngTree.selected}">
+    <span ng-show="item._ngTree.status !== 'loading'">
+      <span ng-click="toggleFolding(item)" ng-show="item._ngTree.folded" compiled="options.indicators.folded"></span>
+      <span ng-click="toggleFolding(item)" ng-show="!item._ngTree.folded" compiled="options.indicators.unfolded"></span>
+    </span>
 
-  <i ng-show="item._ngTree.status === 'loading'">[...]</i>
+    <span ng-show="item._ngTree.status === 'loading'" compiled="options.indicators.loading"></span>
 
-  <a href="#" ng-click="itemSelected(item)">
-    {{item.name}} [id:{{item.id}}] [children:{{item.children.length}}]
-  </a>
+    <a href="#" ng-click="itemSelected(item)">
+      {{item.name}} [id:{{item.id}}] [children:{{item.children.length}}] [lazy: {{item._options.lazy}}]
+    </a>
+  </div>
 
-  <ul ng-if="item._ngTree.collapsed">
-    <li ng-repeat="item in item.children" compiled="templates.item"></li>
+  <ul ng-if="!item._ngTree.folded">
+    <li ng-repeat="item in item.children track by $index" compiled="templates.item"></li>
   </ul>
 `;
 

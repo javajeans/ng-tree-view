@@ -7,54 +7,78 @@
     <style type="text/css"></style>
 
     <script type="text/javascript" charset="utf-8">
+      var dummyData = [
+          {
+            "id": 28,
+            "children": [],
+            "name": "Consectetur ex id nisi voluptate occaecat dolore eu non dolor nulla excepteur.",
+            _options: { lazy: true }
+          },
+          {
+            "id": 82,
+            "children": "<ReferenceError: array is not defined>",
+            "name": "Cupidatat pariatur pariatur deserunt sint amet anim eiusmod anim dolor et excepteur aliqua elit labore.",
+            _options: { lazy: false }
+          },
+          {
+            "id": 34,
+            "children": [],
+            "name": "Tempor culpa ipsum aliquip occaecat amet excepteur ut in.",
+            _options: { lazy: false }
+          },
+          {
+            "id": 59,
+            "children": [],
+            "name": "Duis pariatur culpa dolor ad tempor nostrud veniam.",
+            _options: { lazy: true }
+          },
+          {
+            "id": 87,
+            "children": [],
+            "name": "Nostrud aute aliquip veniam id officia est voluptate sunt ipsum labore id."
+          }
+      ];
+
       var module = angular.module('ngtree-test-app', ['tolgaakyuz.ngtree'])
         .controller('MainController', ['$scope', '$timeout', '$q', function ($scope, $timeout, $q) {
-          $scope.source = [
-            {
-              "id": 28,
-              "children": [],
-              "name": "Consectetur ex id nisi voluptate occaecat dolore eu non dolor nulla excepteur."
+
+          $scope.selectedFolder = null;
+
+          $scope.ngTree1 = {
+            id: 1,
+            lazy: true,
+            data: dummyData,
+            indicators: {
+              folded: "<b>[+++]</b>", //optional
+              unfolded: "<b>[---]</b>", //optional
+              loading: "<b>loading</b>" //optional
             },
-            {
-              "id": 82,
-              "children": "<ReferenceError: array is not defined>",
-              "name": "Cupidatat pariatur pariatur deserunt sint amet anim eiusmod anim dolor et excepteur aliqua elit labore."
+            shouldLoad: function (item) {
+              return true;
             },
-            {
-              "id": 34,
-              "children": [],
-              "name": "Tempor culpa ipsum aliquip occaecat amet excepteur ut in."
+            onSelect: function (item) {
+              var d = $q.defer();
+              $scope.selectedFolder = item;
+              d.resolve();
+              return d.promise;
             },
-            {
-              "id": 59,
-              "children": [],
-              "name": "Duis pariatur culpa dolor ad tempor nostrud veniam."
-            },
-            {
-              "id": 87,
-              "children": [],
-              "name": "Nostrud aute aliquip veniam id officia est voluptate sunt ipsum labore id."
+            load: function (item) {
+              var d = $q.defer();
+
+              $timeout(function () {
+                var children = [
+                  {id: Math.floor(Math.random() * 100) + 1, name: 'testing', children: []},
+                  {id: Math.floor(Math.random() * 100) + 1, name: 'testing2', children: []}
+                ];
+
+                d.resolve(children);
+              }, 1500);
+
+              return d.promise;
             }
-          ]
+          };
 
-          $scope.onSelected = function (item) {
-            console.log(item);
-          }
-
-          $scope.load = function (item) {
-            var d = $q.defer();
-
-            $timeout(function () {
-              var children = [
-                {id: 106, name: 'testing', children: []},
-                {id: 107, name: 'testing2', children: []}
-              ];
-
-              d.resolve(children);
-            }, 3000);
-
-            return d.promise;
-          }
+          //$scope.ngTree2 = angular.copy($scope.ngTree1)
         }]);
     </script>
   </head>
@@ -62,11 +86,9 @@
   <body ng-controller="MainController">
     <h1>ng-tree</h1>
     <h3><a href="https://github.com/tolgaakyuz/ng-tree">[github]</a></h3>
+    <h4 ng-if="selectedFolder">[id: {{selectedFolder.id}}] [name: {{selectedFolder.name}}] [children: {{selectedFolder.children.length}}]</h4>
+    <h4 ng-if="!selectedFolder">make a selection</h4>
 
-    <ng-tree
-      ng-tree-source="source"
-      ng-tree-on-select="onSelected"
-      ng-tree-load="load">
-    </ng-tree>
+    <div ng-tree="ngTree1"></div>
   </body>
 </html>

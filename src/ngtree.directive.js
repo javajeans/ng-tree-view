@@ -8,9 +8,7 @@ export default () => {
   return {
     template: templates.tree,
     scope: {
-      source: '=ngTreeSource',
-      onSelect: '=ngTreeOnSelect',
-      load: '=ngTreeLoad'
+      _options: '=ngTree'
     },
     controller: 'NgTreeController',
     link: (scope, element, attributes) => {}

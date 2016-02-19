@@ -52,44 +52,102 @@ var _templates2 = _interopRequireDefault(_templates);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ["$scope", function ($scope) {
+exports.default = ["$scope", "$q", function ($scope, $q) {
   'ngInject';
 
   $scope.templates = _templates2.default;
 
-  $scope.tree = $scope.source.map(function (item) {
+  $scope._initItem = function (item) {
     item._ngTree = {
-      collapsed: false
+      folded: true,
+      selected: false
     };
 
+    if (!angular.isArray(item.children || [])) {
+      item.children = [];
+    }
+
     return item;
-  });
+  };
+
+  $scope._initItems = function (items) {
+    return items.map(function (item) {
+      return $scope._initItem(item);
+    });
+  };
+
+  $scope.tree = $scope._initItems($scope._options.data);
+
+  $scope.options = {
+    id: $scope._options.id || 0,
+    lazy: $scope._options.lazy || false,
+    indicators: angular.extend({
+      folded: "[+]",
+      unfolded: "[-]",
+      loading: "[...]"
+    }, $scope._options.indicators || {})
+  };
+
+  $scope._lastSelectedItem = null;
+
+  $scope.shouldLoad = $scope._options.shouldLoad || function (item) {
+    return true;
+  };
+
+  $scope.onSelect = $scope._options.onSelect || function (item) {
+    var d = $q.deer();
+    d.resolve();
+    return d.promise;
+  };
 
   $scope.itemSelected = function (item) {
-    $scope.onSelect(item);
+    $scope.onSelect(item).then(function () {
+      if ($scope._lastSelectedItem) {
+        $scope._lastSelectedItem._ngTree.selected = false;
+      }
+
+      item._ngTree.selected = true;
+      $scope._lastSelectedItem = item;
+    });
+  };
+
+  $scope.load = $scope._options.load || function (item) {
+    var d = $q.defer();
+    d.resolve([]);
+    return d.promise;
   };
 
   $scope.toggleFolding = function (item) {
-    item._ngTree = item._ngTree || {
-      collapsed: false
-    };
-
-    if (item._ngTree.collapsed) {
-      item._ngTree.collapsed = false;
+    // Return if it is already unfolded state
+    if (!item._ngTree.folded) {
+      item._ngTree.folded = true;
       return;
     }
 
+    // Return if it is already loaded
     if (item._ngTree.status === 'loaded') {
-      item._ngTree.collapsed = !item._ngTree.collapsed;
+      item._ngTree.folded = !item._ngTree.folded;
       return;
     }
 
+    var _shouldLoad = $scope.options.lazy || false;
+
+    if (item._options && item._options.hasOwnProperty('lazy')) {
+      _shouldLoad = item._options.lazy;
+    }
+
+    if (!_shouldLoad) {
+      item._ngTree.folded = !item._ngTree.folded;
+      return;
+    }
+
+    // Starting the lazy load
     item._ngTree.status = 'loading';
 
     $scope.load(item).then(function (children) {
-      item.children = children;
+      item.children = $scope._initItems(children);
       item._ngTree.status = 'loaded';
-      item._ngTree.collapsed = !item._ngTree.collapsed;
+      item._ngTree.folded = !item._ngTree.folded;
     });
   };
 }];
@@ -113,9 +171,7 @@ exports.default = function () {
   return {
     template: _templates2.default.tree,
     scope: {
-      source: '=ngTreeSource',
-      onSelect: '=ngTreeOnSelect',
-      load: '=ngTreeLoad'
+      _options: '=ngTree'
     },
     controller: 'NgTreeController',
     link: function link(scope, element, attributes) {}
@@ -129,11 +185,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var tree = function tree() {
-  return '\n  <ul>\n    <li ng-repeat="item in tree" compiled="templates.item"></li>\n  </ul>\n';
+  return '\n  <ul>\n    <li ng-repeat="item in tree track by $index" compiled="templates.item"></li>\n  </ul>\n';
 };
 
 var item = function item() {
-  return '\n  <span ng-show="item._ngTree.status !== \'loading\'">\n    <i ng-click="toggleFolding(item)" ng-show="item._ngTree.collapsed">[-]</i>\n    <i ng-click="toggleFolding(item)" ng-show="!item._ngTree.collapsed">[+]</i>\n  </span>\n\n  <i ng-show="item._ngTree.status === \'loading\'">[...]</i>\n\n  <a href="#" ng-click="itemSelected(item)">\n    {{item.name}} [id:{{item.id}}] [children:{{item.children.length}}]\n  </a>\n\n  <ul ng-if="item._ngTree.collapsed">\n    <li ng-repeat="item in item.children" compiled="templates.item"></li>\n  </ul>\n';
+  return '\n  <div class=\'ng-tree-item-content\' ng-class="{\'selected\': item._ngTree.selected}">\n    <span ng-show="item._ngTree.status !== \'loading\'">\n      <span ng-click="toggleFolding(item)" ng-show="item._ngTree.folded" compiled="options.indicators.folded"></span>\n      <span ng-click="toggleFolding(item)" ng-show="!item._ngTree.folded" compiled="options.indicators.unfolded"></span>\n    </span>\n\n    <span ng-show="item._ngTree.status === \'loading\'" compiled="options.indicators.loading"></span>\n\n    <a href="#" ng-click="itemSelected(item)">\n      {{item.name}} [id:{{item.id}}] [children:{{item.children.length}}] [lazy: {{item._options.lazy}}]\n    </a>\n  </div>\n\n  <ul ng-if="!item._ngTree.folded">\n    <li ng-repeat="item in item.children track by $index" compiled="templates.item"></li>\n  </ul>\n';
 };
 
 exports.default = {

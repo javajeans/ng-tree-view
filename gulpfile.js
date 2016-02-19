@@ -58,8 +58,9 @@ gulp.task('min', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('src/**/*.js', ['scripts']);
+  gulp.watch('src/*.js', ['scripts']);
 })
 
 gulp.task('build', ['scripts', 'min']);
-gulp.task('default', ['scripts', 'watch']);
+gulp.task('dev', ['scripts', 'watch']);
+gulp.task('default', ['scripts']);
