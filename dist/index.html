@@ -1,9 +1,9 @@
 <html ng-app="ngtree-test-app">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>ng-tree example</title>
+    <title>ng-tree-view example</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-    <script src="ng-tree.js"></script>
+    <script src="ng-tree-view.js"></script>
     <style type="text/css"></style>
 
     <script type="text/javascript" charset="utf-8">
@@ -84,11 +84,11 @@
   </head>
 
   <body ng-controller="MainController">
-    <h1>ng-tree</h1>
-    <h3><a href="https://github.com/tolgaakyuz/ng-tree">[github]</a></h3>
+    <h1>ng-tree-view</h1>
+    <h3><a href="https://github.com/tolgaakyuz/ng-tree-view">[github]</a></h3>
     <h4 ng-if="selectedFolder">[id: {{selectedFolder.id}}] [name: {{selectedFolder.name}}] [children: {{selectedFolder.children.length}}]</h4>
     <h4 ng-if="!selectedFolder">make a selection</h4>
 
-    <div ng-tree="ngTree1"></div>
+    <div ng-tree-view="ngTree1"></div>
   </body>
 </html>

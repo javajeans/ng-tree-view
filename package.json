@@ -1,7 +1,7 @@
 {
-  "name": "ng-tree",
+  "name": "ng-tree-view",
   "version": "0.0.2",
-  "homepage": "https://github.com/tolgaakyuz/ng-tree",
+  "homepage": "https://github.com/tolgaakyuz/ng-tree-view",
   "description": "tree view for angularjs",
   "author": {
     "name": "tolgaakyuz",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tolgaakyuz/ng-tree.git"
+    "url": "https://github.com/tolgaakyuz/ng-tree-view.git"
   },
   "devDependencies": {
     "babel": "^6.5.2",

@@ -8,9 +8,9 @@ export default () => {
   return {
     template: templates.tree,
     scope: {
-      _options: '=ngTree'
+      _options: '=ngTreeView'
     },
-    controller: 'NgTreeController',
+    controller: 'NgTreeViewController',
     link: (scope, element, attributes) => {}
   };
 }

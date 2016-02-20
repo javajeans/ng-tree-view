@@ -1,7 +1,7 @@
 {
   "name": "ng-tree-view",
   "description": "tree view for angularjs",
-  "main": "dist/ng-tree.min.js",
+  "main": "dist/ng-tree-view.min.js",
   "authors": [
     "Tolga Akyuz"
   ],
@@ -14,7 +14,7 @@
     "lazy",
     "angularjs"
   ],
-  "homepage": "https://tolgaakyuz.github.io/ng-tree/",
+  "homepage": "https://tolgaakyuz.github.io/ng-tree-view/",
   "moduleType": [],
   "ignore": [
     "**/.*",

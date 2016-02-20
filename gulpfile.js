@@ -24,7 +24,7 @@ gulp.task('scripts', ['jshint'], function() {
   }));
 
   return sources.bundle()
-    .pipe(vinylSourceStream('ng-tree.js'))
+    .pipe(vinylSourceStream('ng-tree-view.js'))
     .pipe(vinylBuffer())
     .pipe(plugins.sourcemaps.init({
       loadMaps: true
@@ -44,7 +44,7 @@ gulp.task('min', function() {
   }));
 
   return sources.bundle()
-    .pipe(vinylSourceStream('ng-tree.min.js'))
+    .pipe(vinylSourceStream('ng-tree-view.min.js'))
     .pipe(vinylBuffer())
     .pipe(plugins.sourcemaps.init({
       loadMaps: true

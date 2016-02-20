@@ -23,23 +23,23 @@ exports.default = ["$compile", function ($compile) {
 },{}],2:[function(require,module,exports){
 'use strict';
 
-var _ngtree = require('./ngtree.directive');
+var _ngTreeView = require('./ng-tree-view.directive');
 
-var _ngtree2 = _interopRequireDefault(_ngtree);
+var _ngTreeView2 = _interopRequireDefault(_ngTreeView);
 
 var _directive = require('./directive.compiled');
 
 var _directive2 = _interopRequireDefault(_directive);
 
-var _ngtree3 = require('./ngtree.controller');
+var _ngTreeView3 = require('./ng-tree-view.controller');
 
-var _ngtree4 = _interopRequireDefault(_ngtree3);
+var _ngTreeView4 = _interopRequireDefault(_ngTreeView3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-angular.module('tolgaakyuz.ngtree', []).controller('NgTreeController', _ngtree4.default).directive('ngTree', _ngtree2.default).directive('compiled', _directive2.default);
+angular.module('tolgaakyuz.ngtree', []).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
 
-},{"./directive.compiled":1,"./ngtree.controller":3,"./ngtree.directive":4}],3:[function(require,module,exports){
+},{"./directive.compiled":1,"./ng-tree-view.controller":3,"./ng-tree-view.directive":4}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -171,9 +171,9 @@ exports.default = function () {
   return {
     template: _templates2.default.tree,
     scope: {
-      _options: '=ngTree'
+      _options: '=ngTreeView'
     },
-    controller: 'NgTreeController',
+    controller: 'NgTreeViewController',
     link: function link(scope, element, attributes) {}
   };
 };
