@@ -21,6 +21,7 @@ exports.default = ["$compile", function ($compile) {
 }];
 
 },{}],2:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var _ngTreeView = require('./ng-tree-view.directive');
@@ -37,7 +38,11 @@ var _ngTreeView4 = _interopRequireDefault(_ngTreeView3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var angular = (typeof window !== "undefined" ? window['angular'] : typeof global !== "undefined" ? global['angular'] : null);
+
 angular.module('ngTreeView', []).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{"./directive.compiled":1,"./ng-tree-view.controller":3,"./ng-tree-view.directive":4}],3:[function(require,module,exports){
 'use strict';
