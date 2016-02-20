@@ -37,7 +37,7 @@ var _ngTreeView4 = _interopRequireDefault(_ngTreeView3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-angular.module('tolgaakyuz.ngtree', []).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
+angular.module('ngTreeView', []).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
 
 },{"./directive.compiled":1,"./ng-tree-view.controller":3,"./ng-tree-view.directive":4}],3:[function(require,module,exports){
 'use strict';
