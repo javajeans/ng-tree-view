@@ -4,6 +4,7 @@ var browserify = require('browserify');
 var vinylSourceStream = require('vinyl-source-stream');
 var vinylBuffer = require('vinyl-buffer');
 var plugins = require('gulp-load-plugins')();
+var deploy = require('gulp-gh-pages');
 
 gulp.task('jshint', function() {
   return gulp.src('src/**/*.js')
@@ -60,6 +61,11 @@ gulp.task('min', function() {
 gulp.task('watch', function() {
   gulp.watch('src/*.js', ['scripts']);
 })
+
+gulp.task("deploy", ["build"], function () {
+  return gulp.src("./dist/**/*")
+    .pipe(deploy());
+});
 
 gulp.task('build', ['scripts', 'min']);
 gulp.task('dev', ['scripts', 'watch']);
