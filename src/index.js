@@ -5,7 +5,7 @@ import compiled from './directive.compiled';
 import controller from './ng-tree-view.controller';
 
 angular
-  .module('tolgaakyuz.ngtree', [])
+  .module('ngTreeView', [])
   .controller('NgTreeViewController', controller)
   .directive('ngTreeView', directive)
   .directive('compiled', compiled)
