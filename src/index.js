@@ -10,4 +10,4 @@ angular
   .module('ngTreeView', [])
   .controller('NgTreeViewController', controller)
   .directive('ngTreeView', directive)
-  .directive('compiled', compiled)
+  .directive('compiled', compiled);

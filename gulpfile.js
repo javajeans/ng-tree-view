@@ -16,8 +16,8 @@ gulp.task('jshint', function() {
 
 gulp.task('scripts', ['jshint'], function() {
   var sources = browserify({
-    entries: 'src/index.js',
-    debug: true
+    insertGlobals: true,
+    entries: 'src/index.js'
   })
   .transform(babelify.configure({
     presets: ["es2015"]
@@ -30,8 +30,8 @@ gulp.task('scripts', ['jshint'], function() {
       loadMaps: true
     }))
     .pipe(plugins.ngAnnotate())
-    .pipe(gulp.dest('dist'))
-    .pipe(plugins.connect.reload());
+    .pipe(gulp.dest('dist'));
+//    .pipe(plugins.connect.reload());
 });
 
 gulp.task('min', function() {
@@ -60,7 +60,7 @@ gulp.task('min', function() {
 
 gulp.task('watch', function() {
   gulp.watch('src/*.js', ['scripts']);
-})
+});
 
 gulp.task("deploy", ["build"], function () {
   return gulp.src("./dist/**/*")
