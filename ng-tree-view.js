@@ -3100,14 +3100,18 @@ var _ngTreeView3 = require('./ng-tree-view.controller');
 
 var _ngTreeView4 = _interopRequireDefault(_ngTreeView3);
 
+var _ngTreeView5 = require('./ng-tree-view.service');
+
+var _ngTreeView6 = _interopRequireDefault(_ngTreeView5);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var angular = (typeof window !== "undefined" ? window['angular'] : typeof global !== "undefined" ? global['angular'] : null);
 
-angular.module('ngTreeView', []).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
+angular.module('ngTreeView', []).service('NgTreeViewService', _ngTreeView6.default).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/index.js","/src")
-},{"./directive.compiled":7,"./ng-tree-view.controller":9,"./ng-tree-view.directive":10,"_process":6,"buffer":2}],9:[function(require,module,exports){
+},{"./directive.compiled":7,"./ng-tree-view.controller":9,"./ng-tree-view.directive":10,"./ng-tree-view.service":11,"_process":6,"buffer":2}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3125,12 +3129,8 @@ var _templates2 = _interopRequireDefault(_templates);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ["$scope", "$timeout", "$q", function ($scope, $timeout, $q) {
+exports.default = ["$scope", "$timeout", "$q", "NgTreeViewService", function ($scope, $timeout, $q, NgTreeViewService) {
   'ngInject';
-
-  $scope.templates = _templates2.default;
-
-  $scope.cache = {};
 
   $scope.options = {
     id: $scope._options.id || 0,
@@ -3142,11 +3142,22 @@ exports.default = ["$scope", "$timeout", "$q", function ($scope, $timeout, $q) {
     }, $scope._options.indicators || {})
   };
 
-  $scope._lastSelectedItem = null;
+  $scope.templates = _templates2.default;
 
-  $scope.shouldLoad = $scope._options.shouldLoad || function (item) {
-    return true;
+  $scope.tree = [];
+
+  $scope.pre = $scope._options.pre || function (item) {
+    var d = $q.defer();
+    d.resolve([]);
+    return d.promise;
   };
+
+  NgTreeViewService.Init($scope._options.data, {
+    dataSource: $scope._options.load
+  }).then(function (items) {
+    $scope.tree = items;
+    $scope._options.ready(NgTreeViewService);
+  });
 
   $scope.onSelect = $scope._options.onSelect || function (item) {
     var d = $q.deer();
@@ -3155,118 +3166,18 @@ exports.default = ["$scope", "$timeout", "$q", function ($scope, $timeout, $q) {
   };
 
   $scope.itemSelected = function (item) {
-    $scope.onSelect(item).then(function () {
-      if ($scope._lastSelectedItem) {
-        $scope._lastSelectedItem._ngTree.selected = false;
-      }
-
-      item._ngTree.selected = true;
-      $scope._lastSelectedItem = item;
+    NgTreeViewService.Select(item).then(function () {
+      $scope.onSelect(item).then(function () {});
     });
   };
 
-  $scope.load = $scope._options.load || function (item) {
-    var d = $q.defer();
-    d.resolve([]);
-    return d.promise;
+  $scope.toggleFolding = function (item) {
+    NgTreeViewService.ToggleFold(item).then(function () {});
   };
-
-  $scope.pre = $scope._options.pre || function (item) {
-    var d = $q.defer();
-    d.resolve([]);
-    return d.promise;
-  };
-
-  $scope.toggleFolding = function (item, next) {
-    next = next || function () {};
-
-    // Return if it is already unfolded state
-    if (!item._ngTree.folded) {
-      item._ngTree.folded = true;
-      return next(null, item);
-    }
-
-    // Return if it is already loaded
-    //console.log(item.name + ' -> ' + JSON.stringify(item._ngTree));
-
-    if (item._ngTree.status === 'loaded') {
-      item._ngTree.folded = !item._ngTree.folded;
-      return next(null, item);
-    }
-
-    var _shouldLoad = $scope.options.lazy || false;
-
-    if (item._options && item._options.hasOwnProperty('lazy')) {
-      _shouldLoad = item._options.lazy;
-    }
-
-    if (!_shouldLoad) {
-      item._ngTree.folded = !item._ngTree.folded;
-      return next(null, item);
-    }
-
-    item._ngTree.status = 'loading';
-
-    $scope.load(item).then(function (children) {
-      item.children = $scope._initItems(children);
-      item._ngTree.status = 'loaded';
-      item._ngTree.folded = !item._ngTree.folded;
-      item.children.forEach(function (c) {
-        c.parent = item.id.toString();
-      });
-    });
-  };
-
-  $scope._initItem = function (item) {
-    item._ngTree = angular.extend(item._ngTree || {
-      folded: true,
-      selected: false
-    }, item._options || {});
-
-    if (!angular.isArray(item.children || [])) {
-      item.children = [];
-    }
-
-    if (item._ngTree.selected) {
-      $scope._lastSelectedItem = item;
-    }
-
-    $scope.cache[item.id.toString()] = item;
-
-    if (!item._ngTree.folded) {
-      item._ngTree.folded = !item._ngTree.folded;
-      $scope.toggleFolding(item);
-    }
-
-    return item;
-  };
-
-  $scope._initItems = function (items) {
-    return items.map(function (item) {
-      return $scope._initItem(item);
-    });
-  };
-
-  $scope.tree = $scope._initItems($scope._options.data);
-
-  //$scope.pre()
-  //.then((path) => {
-  //async.mapSeries(path || [], (id, next) => {
-  //if (!$scope.cache[id]) return next();
-  //$scope.toggleFolding($scope.cache[id], next);
-  //}, (err, items) => {
-  //if (err) return console.log('couldnt load path');
-
-  //if (items.length) {
-  //var lastItem = $scope.cache[path[path.length - 1]];
-  //$scope.itemSelected(lastItem);
-  //}
-  //});
-  //});
 }];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.controller.js","/src")
-},{"./templates":11,"_process":6,"async":1,"buffer":2}],10:[function(require,module,exports){
+},{"./templates":12,"_process":6,"async":1,"buffer":2}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3294,7 +3205,226 @@ exports.default = function () {
 };
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.directive.js","/src")
-},{"./templates":11,"_process":6,"buffer":2}],11:[function(require,module,exports){
+},{"./templates":12,"_process":6,"buffer":2}],11:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _async = require('async');
+
+var _async2 = _interopRequireDefault(_async);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = ["$q", function ($q) {
+  'ngInject';
+
+  var tree = [];
+
+  var cache = {};
+
+  var lastSelectedItem = null;
+
+  var initItem = function initItem(item) {
+    item._ngTree = {
+      folded: true,
+      selected: false,
+      status: item._ngTree ? item._ngTree.status || 'new' : 'new'
+    };
+
+    // Make sure children field is esits and array
+    if (!item.children || !angular.isArray(item.children || [])) {
+      item.children = [];
+    }
+
+    // Cache the item
+    cache[item.id.toString()] = item;
+
+    if (!item.children.length) {
+      return item;
+    } else {
+      item.children = initItems(item.children);
+      return item;
+    }
+  };
+
+  var initItems = function initItems(items) {
+    return items.map(function (item) {
+      return initItem(item);
+    });
+  };
+
+  var init = function init(items, options) {
+    var d = $q.defer();
+
+    dataSource = options.dataSource;
+    tree = initItems(items);
+
+    d.resolve(tree);
+    return d.promise;
+  };
+
+  var select = function select(item) {
+    var d = $q.defer();
+
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    if (lastSelectedItem) {
+      lastSelectedItem._ngTree.selected = false;
+    }
+
+    item._ngTree.selected = true;
+    lastSelectedItem = item;
+
+    d.resolve();
+    return d.promise;
+  };
+
+  var unselect = function unselect(item) {
+    var d = $q.defer();
+
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    if (lastSelectedItem && lastSelectedItem.id.toString() === item.id.toString()) {
+      lastSelectedItem = null;
+    }
+
+    item._ngTree.selected = false;
+
+    d.resolve();
+    return d.promise;
+  };
+
+  var dataSource = function dataSource(item) {
+    var d = $q.defer();
+    d.resolve([]);
+    return d.promise;
+  };
+
+  var load = function load(item) {
+    var d = $q.defer();
+
+    if (item._ngTree.status === 'loaded') {
+      d.resolve();
+    } else {
+      item._ngTree.status = 'loading';
+
+      dataSource(item).then(function (children) {
+        children = children || [];
+
+        item.children = initItems(children);
+        item._ngTree.status = 'loaded';
+        item.children.forEach(function (c) {
+          c.parent = item.id.toString();
+        });
+
+        d.resolve();
+      });
+    }
+
+    return d.promise;
+  };
+
+  var fold = function fold(item) {
+    var d = $q.defer();
+
+    item._ngTree.folded = true;
+
+    d.resolve();
+    return d.promise;
+  };
+
+  var unfold = function unfold(item) {
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    var d = $q.defer();
+
+    item._ngTree.folded = false;
+
+    if (item._ngTree.status === 'loaded') {
+      d.resolve();
+    } else {
+      load(item).then(function () {
+        d.resolve();
+      });
+    }
+
+    return d.promise;
+  };
+
+  var toggleFold = function toggleFold(item) {
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    if (item._ngTree.folded) {
+      return unfold(item);
+    } else {
+      return fold(item);
+    }
+  };
+
+  var selectAndUnfold = function selectAndUnfold(item) {
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    var d = $q.defer();
+
+    select(item).then(function () {
+      unfold(item).then(function () {
+        d.resolve();
+      });
+    });
+
+    return d.promise;
+  };
+
+  var selectAndFold = function selectAndFold(item) {
+    if (!item.id && cache[item]) {
+      item = cache[item];
+    }
+
+    var d = $q.defer();
+
+    select(item).then(function () {
+      fold(item).then(function () {
+        d.resolve();
+      });
+    });
+
+    return d.promise;
+  };
+
+  return {
+    Init: init,
+    GetTree: function GetTree() {
+      return tree;
+    },
+    GetItem: function GetItem(id) {
+      return cache[id];
+    },
+    Select: select,
+    Unselect: unselect,
+    Fold: fold,
+    Unfold: unfold,
+    SelectAndUnfold: selectAndUnfold,
+    SelectAndFold: selectAndFold,
+    ToggleFold: toggleFold
+  };
+}];
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.service.js","/src")
+},{"_process":6,"async":1,"buffer":2}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
