@@ -9,6 +9,7 @@ export default ($scope, $timeout, $q, NgTreeViewService) => {
   $scope.options = {
     id: $scope._options.id || 0,
     lazy: $scope._options.lazy || false,
+    autoUnfolding: $scope._options.autoUnfolding || false,
     indicators: angular.extend({
       folded: "[+]",
       unfolded: "[-]",
@@ -45,7 +46,15 @@ export default ($scope, $timeout, $q, NgTreeViewService) => {
     NgTreeViewService
       .Select(item)
       .then(() => {
-        $scope.onSelect(item).then(() => {});
+        if ($scope.options.autoUnfolding) {
+          NgTreeViewService
+            .Unfold(item)
+            .then(() => {
+              $scope.onSelect(item).then(angular.identity);
+            });
+        } else {
+          $scope.onSelect(item).then(angular.identity);
+        }
       });
   }
 

@@ -3135,6 +3135,7 @@ exports.default = ["$scope", "$timeout", "$q", "NgTreeViewService", function ($s
   $scope.options = {
     id: $scope._options.id || 0,
     lazy: $scope._options.lazy || false,
+    autoUnfolding: $scope._options.autoUnfolding || false,
     indicators: angular.extend({
       folded: "[+]",
       unfolded: "[-]",
@@ -3167,7 +3168,13 @@ exports.default = ["$scope", "$timeout", "$q", "NgTreeViewService", function ($s
 
   $scope.itemSelected = function (item) {
     NgTreeViewService.Select(item).then(function () {
-      $scope.onSelect(item).then(function () {});
+      if ($scope.options.autoUnfolding) {
+        NgTreeViewService.Unfold(item).then(function () {
+          $scope.onSelect(item).then(angular.identity);
+        });
+      } else {
+        $scope.onSelect(item).then(angular.identity);
+      }
     });
   };
 

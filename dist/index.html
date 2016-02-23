@@ -4,7 +4,11 @@
     <title>ng-tree-view example</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
     <script src="ng-tree-view.js"></script>
-    <style type="text/css"></style>
+    <style type="text/css">
+      .folder-name {
+        display: inline-block;
+      }
+    </style>
 
     <script type="text/javascript" charset="utf-8">
       var dummyData = [
@@ -48,6 +52,7 @@
             id: 1,
             lazy: true,
             data: dummyData,
+            autoUnfolding: true,
             indicators: {
               folded: "<b>[+++]</b>", //optional
               unfolded: "<b>[---]</b>", //optional
@@ -55,6 +60,11 @@
             },
             shouldLoad: function (item) {
               return true;
+            },
+            ready: function (treeService) {
+              treeService
+                .Unfold('28')
+                .then(function () {});
             },
             onSelect: function (item) {
               var d = $q.defer();
@@ -88,7 +98,6 @@
     <h3><a href="https://github.com/tolgaakyuz/ng-tree-view">[github]</a></h3>
     <h4 ng-if="selectedFolder">[id: {{selectedFolder.id}}] [name: {{selectedFolder.name}}] [children: {{selectedFolder.children.length}}]</h4>
     <h4 ng-if="!selectedFolder">make a selection</h4>
-
     <div ng-tree-view="ngTree1"></div>
   </body>
 </html>
