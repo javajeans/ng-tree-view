@@ -15,12 +15,31 @@ const item = () => `
 
     <span ng-show="item._ngTree.status === 'loading'" compiled="options.indicators.loading"></span>
 
-    <div class="folder-name" ng-class="{'selected': item._ngTree.selected}">
+    <div class="folder-name" ng-class="{'selected': item._ngTree.selected}" item="item" editable="item._ngTree.editing">
       <a href="#" ng-click="itemSelected(item)">
         {{item.name}}
       </a>
-    </div>
 
+      <span ng-if="item.editable && !item._ngTree.editing">
+        <a href="#"
+          compiled="item.editableOptions.indicators.add"
+          ng-click="item.addChildren();">
+        </a>
+      </span>
+
+      <span ng-if="item.editable && item._ngTree.editing">
+        <a href="#"
+          ng-if="item.editable"
+          compiled="item.editableOptions.indicators.save"
+          ng-click="onSave(item);">
+        </a>
+        <a href="#"
+          ng-if="item.editable"
+          compiled="item.editableOptions.indicators.cancel"
+          ng-click="item.cancel();">
+        </a>
+      </span>
+    </div>
   </div>
 
   <ul ng-if="!item._ngTree.folded">

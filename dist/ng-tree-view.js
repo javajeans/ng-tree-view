@@ -3088,6 +3088,58 @@ exports.default = ["$compile", function ($compile) {
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = ["$compile", function ($compile) {
+  'ngInject';
+
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      editing: '=editable',
+      item: '=item'
+    },
+    link: function link(scope, ele, attrs) {
+      scope.$watch('editing', function (newValue, oldValue) {
+        if (!newValue) {
+          return;
+        }
+
+        var $editable = angular.element(ele.find('a')[0]);
+
+        $editable.data('before', $editable.text());
+        $editable.attr('contenteditable', '');
+        $editable[0].focus();
+
+        var range = document.createRange();
+        range.selectNodeContents($editable[0]);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        $editable.on('blur keyup paste input', function () {
+          scope.item.name = $editable.text().trim();
+
+          //if ($this.data('before') !== $this.html()) {
+          //$this.data('before', $this.html());
+          //$this.trigger('change');
+          //}
+
+          //return $this;
+        });
+      });
+    }
+  };
+}];
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/editable.js","/src")
+},{"_process":6,"buffer":2}],9:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+'use strict';
+
 var _ngTreeView = require('./ng-tree-view.directive');
 
 var _ngTreeView2 = _interopRequireDefault(_ngTreeView);
@@ -3095,6 +3147,10 @@ var _ngTreeView2 = _interopRequireDefault(_ngTreeView);
 var _directive = require('./directive.compiled');
 
 var _directive2 = _interopRequireDefault(_directive);
+
+var _editable = require('./editable');
+
+var _editable2 = _interopRequireDefault(_editable);
 
 var _ngTreeView3 = require('./ng-tree-view.controller');
 
@@ -3108,10 +3164,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var angular = (typeof window !== "undefined" ? window['angular'] : typeof global !== "undefined" ? global['angular'] : null);
 
-angular.module('ngTreeView', []).service('NgTreeViewService', _ngTreeView6.default).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default);
+//import utildEditable from './editable';
+
+angular.module('ngTreeView', [/*'ng-utils-editable'*/]).service('NgTreeViewService', _ngTreeView6.default).controller('NgTreeViewController', _ngTreeView4.default).directive('ngTreeView', _ngTreeView2.default).directive('compiled', _directive2.default).directive('editable', _editable2.default);
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/index.js","/src")
-},{"./directive.compiled":7,"./ng-tree-view.controller":9,"./ng-tree-view.directive":10,"./ng-tree-view.service":11,"_process":6,"buffer":2}],9:[function(require,module,exports){
+},{"./directive.compiled":7,"./editable":8,"./ng-tree-view.controller":10,"./ng-tree-view.directive":11,"./ng-tree-view.service":12,"_process":6,"buffer":2}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3161,7 +3219,13 @@ exports.default = ["$scope", "$timeout", "$q", "NgTreeViewService", function ($s
   });
 
   $scope.onSelect = $scope._options.onSelect || function (item) {
-    var d = $q.deer();
+    var d = $q.defer();
+    d.resolve();
+    return d.promise;
+  };
+
+  $scope.onSave = $scope._options.onSave || function (item) {
+    var d = $q.defer();
     d.resolve();
     return d.promise;
   };
@@ -3184,7 +3248,7 @@ exports.default = ["$scope", "$timeout", "$q", "NgTreeViewService", function ($s
 }];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.controller.js","/src")
-},{"./templates":12,"_process":6,"async":1,"buffer":2}],10:[function(require,module,exports){
+},{"./templates":13,"_process":6,"async":1,"buffer":2}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3212,7 +3276,7 @@ exports.default = function () {
 };
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.directive.js","/src")
-},{"./templates":12,"_process":6,"buffer":2}],11:[function(require,module,exports){
+},{"./templates":13,"_process":6,"buffer":2}],12:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3226,7 +3290,7 @@ var _async2 = _interopRequireDefault(_async);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ["$q", function ($q) {
+exports.default = ["$q", "$timeout", function ($q, $timeout) {
   'ngInject';
 
   var tree = [];
@@ -3240,6 +3304,41 @@ exports.default = ["$q", function ($q) {
       folded: true,
       selected: false,
       status: item._ngTree ? item._ngTree.status || 'new' : 'new'
+    };
+
+    item.editable = true;
+
+    item.addChildren = function () {
+      var self = item;
+
+      $timeout(function () {
+        var newItem = initItem({
+          id: 'newid',
+          name: 'Ne folder'
+        });
+
+        newItem.edit();
+
+        self.children = [newItem].concat(self.children);
+      }, 0);
+    };
+
+    item.cancel = function () {
+      console.log('canceling editing');
+    };
+
+    item.edit = function () {
+      var self = item;
+      self._ngTree.editing = true;
+    };
+
+    item.editableOptions = {
+      indicators: {
+        edit: "[edit2]",
+        save: "[save]",
+        cancel: "[cancel]",
+        add: "[add]"
+      }
     };
 
     // Make sure children field is esits and array
@@ -3431,7 +3530,7 @@ exports.default = ["$q", function ($q) {
 }];
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/ng-tree-view.service.js","/src")
-},{"_process":6,"async":1,"buffer":2}],12:[function(require,module,exports){
+},{"_process":6,"async":1,"buffer":2}],13:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -3443,7 +3542,7 @@ var tree = function tree() {
 };
 
 var item = function item() {
-  return '\n  <div class=\'ng-tree-item-content\'>\n    <span ng-show="item._ngTree.status !== \'loading\'">\n      <span ng-click="toggleFolding(item)" ng-show="item._ngTree.folded" compiled="options.indicators.folded"></span>\n      <span ng-click="toggleFolding(item)" ng-show="!item._ngTree.folded" compiled="options.indicators.unfolded"></span>\n    </span>\n\n    <span ng-show="item._ngTree.status === \'loading\'" compiled="options.indicators.loading"></span>\n\n    <div class="folder-name" ng-class="{\'selected\': item._ngTree.selected}">\n      <a href="#" ng-click="itemSelected(item)">\n        {{item.name}}\n      </a>\n    </div>\n\n  </div>\n\n  <ul ng-if="!item._ngTree.folded">\n    <li ng-repeat="item in item.children track by $index" compiled="templates.item" ng-class="{\'selected\': item._ngTree.selected}"></li>\n  </ul>\n';
+  return '\n  <div class=\'ng-tree-item-content\'>\n    <span ng-show="item._ngTree.status !== \'loading\'">\n      <span ng-click="toggleFolding(item)" ng-show="item._ngTree.folded" compiled="options.indicators.folded"></span>\n      <span ng-click="toggleFolding(item)" ng-show="!item._ngTree.folded" compiled="options.indicators.unfolded"></span>\n    </span>\n\n    <span ng-show="item._ngTree.status === \'loading\'" compiled="options.indicators.loading"></span>\n\n    <div class="folder-name" ng-class="{\'selected\': item._ngTree.selected}" item="item" editable="item._ngTree.editing">\n      <a href="#" ng-click="itemSelected(item)">\n        {{item.name}}\n      </a>\n\n      <span ng-if="item.editable && !item._ngTree.editing">\n        <a href="#"\n          compiled="item.editableOptions.indicators.add"\n          ng-click="item.addChildren();">\n        </a>\n      </span>\n\n      <span ng-if="item.editable && item._ngTree.editing">\n        <a href="#"\n          ng-if="item.editable"\n          compiled="item.editableOptions.indicators.save"\n          ng-click="onSave(item);">\n        </a>\n        <a href="#"\n          ng-if="item.editable"\n          compiled="item.editableOptions.indicators.cancel"\n          ng-click="item.cancel();">\n        </a>\n      </span>\n    </div>\n  </div>\n\n  <ul ng-if="!item._ngTree.folded">\n    <li ng-repeat="item in item.children track by $index" compiled="templates.item" ng-class="{\'selected\': item._ngTree.selected}"></li>\n  </ul>\n';
 };
 
 exports.default = {
@@ -3452,4 +3551,4 @@ exports.default = {
 };
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/src/templates.js","/src")
-},{"_process":6,"buffer":2}]},{},[8]);
+},{"_process":6,"buffer":2}]},{},[9]);

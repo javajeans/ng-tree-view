@@ -2,7 +2,7 @@
 
 import async from 'async';
 
-export default ($q) => {
+export default ($q, $timeout) => {
   'ngInject';
 
   let tree = [];
@@ -16,6 +16,41 @@ export default ($q) => {
       folded: true,
       selected: false,
       status: (item._ngTree) ? item._ngTree.status || 'new' : 'new'
+    }
+
+    item.editable = true;
+
+    item.addChildren = () => {
+      let self = item;
+
+      $timeout(() => {
+        let newItem = initItem({
+          id: 'newid',
+          name: 'Ne folder'
+        });
+
+        newItem.edit();
+
+        self.children = [newItem].concat(self.children);
+      }, 0);
+    }
+
+    item.cancel = () => {
+      console.log('canceling editing');
+    }
+
+    item.edit = () => {
+      let self = item;
+      self._ngTree.editing = true;
+    };
+
+    item.editableOptions = {
+      indicators: {
+        edit: "[edit2]",
+        save: "[save]",
+        cancel: "[cancel]",
+        add: "[add]"
+      }
     }
 
     // Make sure children field is esits and array
@@ -204,6 +239,6 @@ export default ($q) => {
     Unfold: unfold,
     SelectAndUnfold: selectAndUnfold,
     SelectAndFold: selectAndFold,
-    ToggleFold: toggleFold,
+    ToggleFold: toggleFold
   }
 }

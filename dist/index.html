@@ -53,6 +53,14 @@
             lazy: true,
             data: dummyData,
             autoUnfolding: true,
+            editable: {
+              indicators: {
+                edit: "[edit2]",
+                save: "[save]",
+                cancel: "[cancel]",
+                add: "[add]"
+              }
+            },
             indicators: {
               folded: "<b>[+++]</b>", //optional
               unfolded: "<b>[---]</b>", //optional
@@ -69,6 +77,13 @@
             onSelect: function (item) {
               var d = $q.defer();
               $scope.selectedFolder = item;
+              d.resolve();
+              return d.promise;
+            },
+            onSave: function (item) {
+              var d = $q.defer();
+              console.log('saving item');
+              console.log(item);
               d.resolve();
               return d.promise;
             },

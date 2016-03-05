@@ -37,7 +37,13 @@ export default ($scope, $timeout, $q, NgTreeViewService) => {
     });
 
   $scope.onSelect = $scope._options.onSelect || ((item) => {
-    let d = $q.deer();
+    let d = $q.defer();
+    d.resolve()
+    return d.promise;
+  });
+
+  $scope.onSave = $scope._options.onSave || ((item) => {
+    let d = $q.defer();
     d.resolve()
     return d.promise;
   });
